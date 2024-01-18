@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Conexion Asíncrona en Kotlin</string>
+    <string name="web">http://dam.org.es/ficheros/frases.html</string>
+    <string name="descargar">Descargar</string>
+</resources>
