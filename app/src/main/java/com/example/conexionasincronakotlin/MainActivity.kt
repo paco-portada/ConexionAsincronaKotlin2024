@@ -10,10 +10,17 @@ import android.view.View
 import android.widget.Toast
 import com.example.conexionasincronakotlin.databinding.ActivityMainBinding
 import kotlinx.coroutines.awaitCancellation
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
+import kotlin.jvm.Throws
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
@@ -49,11 +56,39 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun OkHTTPdownload(web: URL) {
+        start = System.currentTimeMillis()
+        val client = OkHttpClient()
+        val request: Request = Request.Builder()
+            .url(web)
+            .build()
 
+        client.newCall(request).enqueue(object : Callback {
 
+            @Throws(IOException::class)
+            override fun onResponse(call: Call, response: Response) {
+                response.body.use {ResponseBody ->
+                    if (!response.isSuccessful) {
+                        showResponse("Unexpected code: $response")
+                    } else {
+                        val responseData = response.body!!.string()
+                        showResponse(responseData)
+                    }
+                }
+            }
+            @Throws(IOException::class)
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("Error: ", e.message!!.toString())
+                showResponse("Fallo: " + e.message.toString())
+            }
+        })
+    }
 
-
-
+    private fun showResponse(message: String) {
+        end = System.currentTimeMillis()
+        runOnUiThread {
+            binding.webView.loadDataWithBaseURL(url.toString(), message, "text/html", "UTF-8", null)
+            binding.textView.text = "Duración: " + (end - start).toString() + " milisegundos"
+    }
 
     }
 
